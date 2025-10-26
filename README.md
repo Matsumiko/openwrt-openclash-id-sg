@@ -472,4 +472,4 @@ lb: &lb {type: url-test, <<: *t}
 
 ## Lisensi
 
-Bebas dipakai & dimodifikasi untuk kebutuhan pribadi/proyek kamu. Sebut sumber kalau membantu 🙌
+Bebas dipakai & dimodifikasi untuk kebutuhan pribadimu.
