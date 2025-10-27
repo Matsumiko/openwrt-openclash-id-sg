@@ -1,6 +1,3 @@
-Siap—ini README.md-nya sudah **aku update** dengan bagian **Hasil Pengujian (Screenshots)** yang menampilkan tiga SS (AdBlock, DNS Leak, Speedtest). Kalau nama file gambarmu beda, tinggal ganti path-nya aja ya.
-
-```md
 # OpenClash Config – Region-Scoped Load-Balance (ID & SG)
 
 Dokumentasi lengkap untuk konfigurasi **OpenClash (Clash.Meta)** dengan **Load-Balance per region** (Indonesia & Singapore) + *master switch* yang fleksibel. Cocok buat router OpenWrt dengan OpenClash.
