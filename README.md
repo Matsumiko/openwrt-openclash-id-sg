@@ -1,3 +1,6 @@
+Siap—ini README.md-nya sudah **aku update** dengan bagian **Hasil Pengujian (Screenshots)** yang menampilkan tiga SS (AdBlock, DNS Leak, Speedtest). Kalau nama file gambarmu beda, tinggal ganti path-nya aja ya.
+
+```md
 # OpenClash Config – Region-Scoped Load-Balance (ID & SG)
 
 Dokumentasi lengkap untuk konfigurasi **OpenClash (Clash.Meta)** dengan **Load-Balance per region** (Indonesia & Singapore) + *master switch* yang fleksibel. Cocok buat router OpenWrt dengan OpenClash.
@@ -17,6 +20,7 @@ Dokumentasi lengkap untuk konfigurasi **OpenClash (Clash.Meta)** dengan **Load-B
 * [Tips & Best Practice](#tips--best-practice)
 * [Troubleshooting](#troubleshooting)
 * [FAQ](#faq)
+* [Hasil Pengujian (Screenshots)](#hasil-pengujian-screenshots)
 * [Catatan Keamanan](#catatan-keamanan)
 * [Lisensi](#lisensi)
 
@@ -25,30 +29,22 @@ Dokumentasi lengkap untuk konfigurasi **OpenClash (Clash.Meta)** dengan **Load-B
 ## Fitur Utama
 
 * **Load-Balance Per Region**
-
   * `LB-ID` untuk pool node Indonesia (provider `pp_id`)
   * `LB-SG` untuk pool node Singapore (provider `pp_sg`)
   * `BALANCE-ALL` untuk gabungan ID+SG
 * **Selector Manual Per Region**
-
   * `INDONESIA` & `SINGAPORE` (pilih node tertentu)
 * **Master Switch GLOBAL**
-
   * Pilih cepat: `LB-ID`, `LB-SG`, `BALANCE-ALL`, atau manual per-region
 * **Blokir Iklan via Rule Provider**
-
   * Grup `ADS` default `REJECT`
 * **Kontrol QUIC (UDP:443)**
-
   * Grup `QUIC` bisa `REJECT` (matikan QUIC) atau `GLOBAL` (izinkan)
 * **DNS Engine Anti-Hijack**
-
   * DoQ AdGuard unfiltered, fake-IP mode, DNS hijack 53
 * **TUN & Auto-Routing**
-
   * Routing otomatis tanpa iptables manual
 * **Sniffer TLS/HTTP**
-
   * Pemetaan rules lebih akurat walau tanpa DNS
 
 ---
@@ -58,6 +54,7 @@ Dokumentasi lengkap untuk konfigurasi **OpenClash (Clash.Meta)** dengan **Load-B
 Letakkan file di **/etc/openclash/** (OpenWrt).
 
 ```
+
 /etc/openclash/
 ├─ config/
 │  └─ openclash-region-lb.yaml      # file config utama (namanya bebas)
@@ -67,8 +64,9 @@ Letakkan file di **/etc/openclash/** (OpenWrt).
 ├─ rule_provider/
 │  └─ category-ads-all.yaml         # terisi otomatis oleh OpenClash (http provider)
 └─ rules/
-   └─ personal.yaml                 # aturan pribadi (opsional)
-```
+└─ personal.yaml                 # aturan pribadi (opsional)
+
+````
 
 > **Catatan**: Pastikan kedua provider (`fadzWRT-id.yaml`, `fadzWRT-sg.yaml`) **ada & berisi**.
 
@@ -87,15 +85,12 @@ Letakkan file di **/etc/openclash/** (OpenWrt).
 
 1. **Salin file config** ke `/etc/openclash/config/openclash-region-lb.yaml`.
 2. **Salin provider**:
-
    * `fadzWRT-id.yaml` → `/etc/openclash/proxy_provider/`
    * `fadzWRT-sg.yaml` → `/etc/openclash/proxy_provider/`
 3. (Opsional) **Buat rules personal** di `/etc/openclash/rules/personal.yaml` (contoh di bawah).
 4. Buka **LuCI → Services → OpenClash → Config Manage**:
-
    * Upload/Select `openclash-region-lb.yaml` sebagai config aktif.
 5. Di tab **Dashboard/Proxies**:
-
    * Pastikan `pp_id` & `pp_sg` terbaca (ada daftar node & RTT).
    * Pilih `GLOBAL = BALANCE-ALL` (rekomendasi awal).
 6. **Start/Restart** OpenClash.
@@ -309,7 +304,7 @@ rules:
   - RULE-SET,category-ads-all,ADS
   - AND,((NETWORK,udp),(DST-PORT,443)),QUIC
   - MATCH,GLOBAL
-```
+````
 
 ---
 
@@ -460,6 +455,48 @@ A: Coba ganti preset `lb` ke:
 ```yaml
 lb: &lb {type: url-test, <<: *t}
 ```
+
+---
+
+## Hasil Pengujian (Screenshots)
+
+> Pengujian dilakukan setelah menerapkan config OpenClash (Clash.Meta) dengan LB regional (ID/SG), DNS fake-IP + DoQ, blokir iklan aktif.
+
+### 1) AdBlock Test
+
+* Skor: **90%** (120 blocked / 14 not blocked)
+* Tools: adblock.turtlecute.org
+
+<p align="center">
+  <img src="assets/screens/adblock-2025-10-27.png" alt="AdBlock test 90% – 120 blocked, 14 not blocked" width="900">
+</p>
+
+### 2) DNS Leak Test
+
+* Resolver terdeteksi: **Google LLC – Singapore** (DoH/DoQ via proxy)
+* Menandakan **DNS tidak bocor ke ISP lokal** (sesuai rute SG yang dipilih)
+
+<p align="center">
+  <img src="assets/screens/dnsleak-2025-10-27.png" alt="DNS Leak – resolver Google Singapore" width="900">
+</p>
+
+### 3) Speedtest
+
+* Down: **72.06 Mbps** · Up: **44.18 Mbps** · Ping: **49 ms**
+* Server: **Fibertrust – Jakarta**
+
+<p align="center">
+  <img src="assets/screens/speedtest-2025-10-27.png" alt="Speedtest 72/44 Mbps, ping 49 ms – Fibertrust Jakarta" width="900">
+</p>
+
+<details>
+<summary><b>Catatan & interpretasi</b></summary>
+
+* **AdBlock 90%**: rule iklan aktif (group <code>ADS=REJECT</code>) bekerja baik. Sisanya (10%) biasanya kategori kosmetik/anti-adblock yang membutuhkan filter tambahan di browser.
+* **DNS Leak SG**: nama resolver “Google LLC – Singapore” menunjukkan **DNS dirouting via proxy** (sesuai pemilihan <code>GLOBAL = LB-SG / BALANCE-ALL</code>). Jika ingin lokal, ganti ke <code>LB-ID</code>.
+* **Speedtest**: angka akan bervariasi per node & jam. Untuk latensi yang merata antar sesi, pertahankan `load-balance (consistent-hashing)`. Kalau mau kejar RTT murni, ganti preset `*lb` ke `type: url-test`.
+
+</details>
 
 ---
 
